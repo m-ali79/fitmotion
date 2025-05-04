@@ -1,0 +1,177 @@
+// Prisma schema model
+
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+enum Gender {
+    male
+    female
+}
+
+enum ActivityLevel {
+    sedentary
+    lightly_active
+    moderately_active
+    very_active
+}
+
+enum FitnessGoal {
+    lose_weight
+    gain_weight
+    maintain_weight
+}
+
+enum WorkoutType {
+    gym
+    cardio
+    stretching_mobility
+    occupational_activity
+    household_activity
+    individual_sport
+    team_sport
+    outdoor_activity
+}
+
+enum MealType {
+    breakfast
+    lunch
+    dinner
+    snack
+}
+
+enum ExperienceLevel {
+    beginner
+    intermediate
+    advanced
+}
+
+enum DietaryPreference {
+    vegetarian
+    vegan
+    pescatarian
+    keto
+    paleo
+    gluten_free
+    dairy_free
+    nut_free
+    low_carb
+    low_fat
+    high_protein
+}
+
+enum EffortLevel {
+    easy
+    moderate
+    challenging
+    intense
+    maximum
+}
+
+model User {
+    id                 String              @id @default(uuid())
+    clerkId            String              @unique
+    name               String?
+    email              String?             @unique
+    gender             Gender?
+    height             Float? // in cm
+    weight             Float? // in kg
+    age                Int?
+    activityLevel      ActivityLevel?
+    fitnessGoal        FitnessGoal?
+    fitnessExperience  ExperienceLevel?
+    dietaryPreferences DietaryPreference[]
+    medicalConditions  String?
+    createdAt          DateTime            @default(now())
+    updatedAt          DateTime            @updatedAt
+    workouts           Workout[]
+    meals              Meal[]
+    weightEntries      WeightEntry[]
+    profile            Profile?
+}
+
+model Profile {
+    id            String   @id @default(uuid())
+    userId        String   @unique
+    user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+    tdee          Int?
+    bmr           Int?
+    dailyCalories Int?
+    dailyProtein  Int? // in grams
+    dailyCarbs    Int? // in grams
+    dailyFat      Int? // in grams
+    updatedAt     DateTime @updatedAt
+}
+
+model Workout {
+    id             String      @id @default(uuid())
+    userId         String
+    user           User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+    type           WorkoutType
+    date           DateTime
+    duration       Int // in minutes
+    caloriesBurned Int?
+    notes          String?
+    effortLevel    EffortLevel
+    createdAt      DateTime    @default(now())
+    updatedAt      DateTime    @updatedAt
+
+    @@index([userId, date])
+}
+
+model Meal {
+    id        String     @id @default(uuid())
+    userId    String
+    user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+    name      String
+    mealType  MealType
+    date      DateTime
+    calories  Int
+    protein   Float // in grams
+    carbs     Float // in grams
+    fat       Float // in grams
+    imageUrl  String?
+    notes     String?
+    foodItems FoodItem[]
+    createdAt DateTime   @default(now())
+    updatedAt DateTime   @updatedAt
+
+    @@index([userId, date])
+    @@index([userId, mealType])
+}
+
+model FoodItem {
+    id          String   @id @default(uuid())
+    mealId      String
+    meal        Meal     @relation(fields: [mealId], references: [id], onDelete: Cascade)
+    name        String
+    calories    Int
+    protein     Float // in grams
+    carbs       Float // in grams
+    fat         Float // in grams
+    servingSize String?
+    imageUrl    String?
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @updatedAt
+
+    @@index([mealId])
+    @@index([name])
+}
+
+model WeightEntry {
+    id        String   @id @default(uuid())
+    userId    String
+    user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+    weightKg  Float
+    date      DateTime @default(now())
+    notes     String?
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@index([userId, date])
+}
