@@ -9,6 +9,15 @@
     "lint": "next lint",
     "postinstall": "prisma generate"
   },
+  "vercel": {
+    "approvedScripts": [
+      "@clerk/shared",
+      "@prisma/client",
+      "@prisma/engines",
+      "prisma",
+      "sharp"
+    ]
+  },
   "dependencies": {
     "@ai-sdk/google": "^1.2.10",
     "@ai-sdk/react": "^1.2.8",
